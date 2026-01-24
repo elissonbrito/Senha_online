@@ -83,3 +83,13 @@ export async function callTicket(ticketId: string) {
     status: "CALLED",
   });
 }
+export async function callPriorityTicket(ticketId: string, table: 25 | 27) {
+  const dayKey = getDayKey();
+  const ref = doc(db, "days", dayKey, "tickets", ticketId);
+
+  await updateDoc(ref, {
+    status: "CALLED",
+    calledTable: table,
+    calledAt: Date.now(),
+  });
+}
