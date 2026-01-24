@@ -1,7 +1,7 @@
 import { db } from "./firebase";
-import { doc, getDoc, runTransaction, collection } from "firebase/firestore";
+import { doc, runTransaction, collection, updateDoc } from "firebase/firestore";
 import type { TicketType, Ticket } from "../types/queue";
-import { getDayKey, formatTicketCode } from "../utils/dayKey";
+import { getDayKey, formatTicketCode } from "../utils/daykey";
 
 const MAX_PRIORITY_SIZE = 6;
 
@@ -25,7 +25,9 @@ export async function createTicket(params: {
   if (total <= 0) throw new Error("Informe pelo menos 1 pessoa.");
 
   if (type === "PRIORITY" && total > MAX_PRIORITY_SIZE) {
-    throw new Error(`Prioridade permite no máximo ${MAX_PRIORITY_SIZE} pessoas (incluindo crianças).`);
+    throw new Error(
+      `Prioridade permite no máximo ${MAX_PRIORITY_SIZE} pessoas (incluindo crianças).`
+    );
   }
 
   const dayKey = getDayKey();
@@ -50,8 +52,9 @@ export async function createTicket(params: {
       tx.update(dayRef, { counters: newCounters });
     }
 
-    // cria a senha (ticket)
-    const ticketRef = doc(collection(db, "days", dayKey, "tickets")); // id auto
+    // cria a senha (ticket) com id auto
+    const ticketRef = doc(collection(db, "days", dayKey, "tickets"));
+
     const ticket: Ticket = {
       id: ticketRef.id,
       dayKey,
@@ -65,9 +68,18 @@ export async function createTicket(params: {
     };
 
     tx.set(ticketRef, ticket);
-
     return ticket;
   });
 
   return result;
+}
+
+// US-005: chamar senha (muda status de WAITING -> CALLED)
+export async function callTicket(ticketId: string) {
+  const dayKey = getDayKey();
+  const ref = doc(db, "days", dayKey, "tickets", ticketId);
+
+  await updateDoc(ref, {
+    status: "CALLED",
+  });
 }
