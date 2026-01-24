@@ -1,18 +1,16 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Atendente from "./pages/Atendente";
 import Painel from "./pages/Painel";
 import Cliente from "./pages/Cliente";
 
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Cliente />} />
         <Route path="/atendente" element={<Atendente />} />
         <Route path="/painel" element={<Painel />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
-
-export default App;
