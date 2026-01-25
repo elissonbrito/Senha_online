@@ -1,6 +1,27 @@
+@import "tailwindcss";
+
+/* Garante Dark UI (combina com o restaurante) */
 :root {
-  font-family: system-ui, Arial, sans-serif;
+  color-scheme: dark;
 }
+
+/* Reset básico */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  background-color: #0B0B0B;
+  color: #F5F5F5;
+
+  /* Fonte neutra e segura */
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
 }
