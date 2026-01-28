@@ -3,7 +3,6 @@ import {
   doc,
   runTransaction,
   collection,
-  serverTimestamp,
 } from "firebase/firestore";
 import type { TicketType } from "../types/queue";
 import { getDayKey } from "../utils/daykey";

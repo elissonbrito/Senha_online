@@ -2,7 +2,8 @@ import React, { useMemo, useState } from "react";
 import Topbar from "./components/Topbar";
 import Acompanhamento from "./pages/Acompanhamento";
 import Pedidos from "./pages/Pedidos";
-type Screen = "home" | "painel" | "contato" | "pedidos";
+import Atendente from "./pages/Atendente";
+type Screen = "home" | "painel" | "contato" | "pedidos" | "atendente";
 
 function NavTabs({
   screen,
@@ -14,6 +15,7 @@ function NavTabs({
   const tabs: { id: Screen; label: string }[] = [
     { id: "home", label: "Início" },
     { id: "painel", label: "Acompanhamento" },
+    { id: "atendente", label: "Atendente" },
     { id: "contato", label: "Contato" },
   ];
 
@@ -146,6 +148,7 @@ export default function App() {
   const page = useMemo(() => {
     if (screen === "home") return <Home goPainel={() => setScreen("painel")} />;
     if (screen === "painel") return <Acompanhamento />;
+    if (screen === "atendente") return <Atendente />;
     if (screen === "pedidos") return <Pedidos />;
     return <Contato />;
   }, [screen]);
