@@ -85,11 +85,41 @@ export async function callTicket(ticketId: string) {
 }
 export async function callPriorityTicket(ticketId: string, table: 25 | 27) {
   const dayKey = getDayKey();
-  const ref = doc(db, "days", dayKey, "tickets", ticketId);
 
-  await updateDoc(ref, {
-    status: "CALLED",
-    calledTable: table,
-    calledAt: Date.now(),
+  const dayRef = doc(db, "days", dayKey);
+  const ticketRef = doc(db, "days", dayKey, "tickets", ticketId);
+
+  await runTransaction(db, async (tx) => {
+    const daySnap = await tx.get(dayRef);
+    const dayData = daySnap.exists() ? daySnap.data() : {};
+
+    const priorityTables = (dayData?.priorityTables ?? {}) as Record<string, string | null>;
+
+    // inicializa se não existir
+    const t25 = priorityTables["25"] ?? null;
+    const t27 = priorityTables["27"] ?? null;
+
+    // valida mesa
+    const key = String(table);
+    const currentOccupant = (table === 25 ? t25 : t27);
+
+    if (currentOccupant) {
+      throw new Error(`Mesa ${table} já está em uso para uma prioridade.`);
+    }
+
+    // ocupa mesa
+    const newTables = {
+      "25": table === 25 ? ticketId : t25,
+      "27": table === 27 ? ticketId : t27,
+    };
+
+    tx.set(dayRef, { priorityTables: newTables }, { merge: true });
+
+    // chama a senha
+    tx.update(ticketRef, {
+      status: "CALLED",
+      calledTable: table,
+      calledAt: Date.now(),
+    });
   });
 }

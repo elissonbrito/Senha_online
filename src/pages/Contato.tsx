@@ -1,9 +1,11 @@
 import Container from "../components/Container";
 import Button from "../components/Button";
+import ContactActions from "../components/ContactActions";
 
 export default function Contato() {
   const phoneDisplay = "(21) 99393-6610";
-  const address = "Av. Maysa, esquina c/ Rua Newton Estillac (ant 80) - Cordeirinho, Maricá, Rio de Janeiro 24921312";
+  const address =
+    "Av. Maysa, esquina c/ Rua Newton Estillac (ant 80) - Cordeirinho, Maricá, Rio de Janeiro 24921312";
 
   function openMaps() {
     const q = encodeURIComponent(address);
@@ -39,11 +41,19 @@ export default function Contato() {
               </div>
             </div>
 
+            {/* ✅ Botões rápidos WhatsApp / SMS / Ligar */}
+            <div className="mt-5">
+              <div className="text-xs text-[#6E6E6E] mb-2">Ações rápidas</div>
+              <ContactActions />
+            </div>
+
             <div className="mt-5 flex gap-2">
               <Button onClick={openMaps}>Abrir no Maps</Button>
               <Button
                 variant="secondary"
-                onClick={() => window.open("hhttps://www.instagram.com/tocadoespanhol/", "_blank")}
+                onClick={() =>
+                  window.open("https://www.instagram.com/tocadoespanhol/", "_blank")
+                }
               >
                 Instagram
               </Button>

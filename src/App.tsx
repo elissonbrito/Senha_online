@@ -3,7 +3,10 @@ import Topbar from "./components/Topbar";
 import Acompanhamento from "./pages/Acompanhamento";
 import Pedidos from "./pages/Pedidos";
 import Atendente from "./pages/Atendente";
-type Screen = "home" | "painel" | "contato" | "pedidos" | "atendente";
+import ContatoPage from "./pages/Contato";
+import Cardapio from "./pages/Cardapio";
+
+type Screen = "home" | "painel" | "pedidos" | "atendente" | "contato" | "cardapio";
 
 function NavTabs({
   screen,
@@ -16,6 +19,7 @@ function NavTabs({
     { id: "home", label: "Início" },
     { id: "painel", label: "Acompanhamento" },
     { id: "atendente", label: "Atendente" },
+    { id: "cardapio", label: "Cardápio" },
     { id: "contato", label: "Contato" },
   ];
 
@@ -50,13 +54,7 @@ function Container({ children }: { children: React.ReactNode }) {
   return <div className="mx-auto max-w-5xl px-4">{children}</div>;
 }
 
-function Card({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-3xl border border-[#2A2A2A] bg-[#151515] p-6">
       <div className="text-sm font-semibold text-white">{title}</div>
@@ -97,45 +95,9 @@ function Home({ goPainel }: { goPainel: () => void }) {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          <Card title="Rápido">
-            Cliente encontra a senha/pedido sem navegar em mil telas.
-          </Card>
-          <Card title="Minimalista">
-            Identidade escura + vermelho parrilla + dourado discreto.
-          </Card>
-          <Card title="Pronto pra evoluir">
-            Depois dá para ligar em Firebase/DB e mostrar status em tempo real.
-          </Card>
-        </div>
-      </section>
-    </Container>
-  );
-}
-
-function Contato() {
-  return (
-    <Container>
-      <section className="py-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-white">
-          Contato <span className="text-[#C89B3C]">e apoio</span>
-        </h2>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-[#2A2A2A] bg-[#151515] p-6">
-            <div className="text-sm font-semibold text-white">Informações</div>
-            <div className="mt-3 space-y-2 text-sm text-[#B5B5B5]">
-              <div>📍 Maricá/RJ</div>
-              <div>📱 WhatsApp: (colocar número)</div>
-              <div>🕒 Horário: (colocar horário)</div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-[#2A2A2A] bg-[#151515] p-6">
-            <div className="text-sm font-semibold text-white">Mapa</div>
-            <div className="mt-3 rounded-2xl border border-[#2A2A2A] bg-[#0B0B0B] p-6 text-xs text-[#B5B5B5]">
-              Placeholder do mapa
-            </div>
-          </div>
+          <Card title="Rápido">Cliente encontra a senha/pedido sem navegar em mil telas.</Card>
+          <Card title="Minimalista">Identidade escura + vermelho parrilla + dourado discreto.</Card>
+          <Card title="Pronto pra evoluir">Depois dá para evoluir com notificações e automações.</Card>
         </div>
       </section>
     </Container>
@@ -150,13 +112,18 @@ export default function App() {
     if (screen === "painel") return <Acompanhamento />;
     if (screen === "atendente") return <Atendente />;
     if (screen === "pedidos") return <Pedidos />;
-    return <Contato />;
+    if (screen === "cardapio") return <Cardapio />;
+    if (screen === "contato") return <ContatoPage />;
+    return <Home goPainel={() => setScreen("painel")} />;
   }, [screen]);
 
   return (
     <div className="min-h-screen bg-[#0B0B0B] text-[#F5F5F5]">
-      {/* ✅ Usa o Topbar do components */}
-      <Topbar onPrimaryCTA={() => setScreen("pedidos")} />
+      {/* Topbar com navegação */}
+      <Topbar
+        onPrimaryCTA={() => setScreen("pedidos")}
+        onNavigate={(s) => setScreen(s)}
+      />
 
       <NavTabs screen={screen} onChange={setScreen} />
 

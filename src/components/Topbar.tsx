@@ -1,16 +1,20 @@
 import Container from "./Container";
 import Button from "./Button";
 import logo from "../assets/logo.jpeg";
+import ContactActions from "../components/ContactActions";
 
+type Screen = "home" | "painel" | "pedidos" | "atendente" | "contato" | "cardapio";
 type Props = {
   onPrimaryCTA?: () => void;
+  onNavigate?: (screen: Screen) => void;
 };
 
-export default function Topbar({ onPrimaryCTA }: Props) {
+export default function Topbar({ onPrimaryCTA, onNavigate }: Props) {
   return (
     <header className="sticky top-0 z-20 border-b border-[#2A2A2A] bg-[#0B0B0B]/90 backdrop-blur">
       <Container>
-        <div className="flex items-center justify-between py-3">
+        <div className="flex items-center justify-between gap-3 py-3">
+          {/* Logo + Nome */}
           <div className="flex items-center gap-3">
             <img
               src={logo}
@@ -28,8 +32,22 @@ export default function Topbar({ onPrimaryCTA }: Props) {
             </div>
           </div>
 
-          <Button onClick={onPrimaryCTA}>Pedir Senha</Button>
+          {/* Ações */}
+          <div className="flex items-center gap-2">
+            <Button onClick={() => onNavigate?.("cardapio")}>Cardápio</Button>
+            <Button onClick={() => onNavigate?.("contato")}>Contato</Button>
+            <Button onClick={() => onNavigate?.("painel")}>Painel</Button>
+            <Button onClick={onPrimaryCTA} disabled={!onPrimaryCTA}>
+              Pedir Senha
+            </Button>
+          </div>
         </div>
+
+        {/* Se você quiser os botões de contato no topo SEM virar "página":
+            pode deixar o ContactActions aqui, discreto, ou só na tela Contato */}
+        {/* <div className="pb-3">
+          <ContactActions />
+        </div> */}
       </Container>
     </header>
   );

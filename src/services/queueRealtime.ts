@@ -12,6 +12,7 @@ import {
   updateDoc,
   serverTimestamp,
   type Unsubscribe,
+  runTransaction,
 } from "firebase/firestore";
 import type { Ticket } from "../types/queue";
 import { getDayKey } from "../utils/daykey";
@@ -206,6 +207,33 @@ export async function callNextTicket(): Promise<Ticket | null> {
  */
 export async function markTicketDone(ticketId: string): Promise<void> {
   const dayKey = getDayKey();
-  const ref = doc(db, "days", dayKey, "tickets", ticketId);
-  await updateDoc(ref, { status: "DONE", finishedAt: serverTimestamp() });
+  const dayRef = doc(db, "days", dayKey);
+  const ticketRef = doc(db, "days", dayKey, "tickets", ticketId);
+
+  await runTransaction(db, async (tx) => {
+    const ticketSnap = await tx.get(ticketRef);
+    if (!ticketSnap.exists()) return;
+
+    const ticket = ticketSnap.data() as any;
+    const calledTable = ticket.calledTable as 25 | 27 | undefined;
+
+    // marca como DONE
+    tx.update(ticketRef, { status: "DONE", finishedAt: serverTimestamp() });
+
+    // se for prioridade e tinha mesa, libera
+    if (calledTable === 25 || calledTable === 27) {
+      const daySnap = await tx.get(dayRef);
+      const dayData = daySnap.exists() ? daySnap.data() : {};
+      const priorityTables = (dayData?.priorityTables ?? {}) as Record<string, string | null>;
+
+      const key = String(calledTable);
+      if (priorityTables[key] === ticketId) {
+        tx.set(
+          dayRef,
+          { priorityTables: { ...priorityTables, [key]: null } },
+          { merge: true }
+        );
+      }
+    }
+  });
 }

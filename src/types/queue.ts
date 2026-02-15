@@ -11,6 +11,8 @@ export type Ticket = {
   total: number;
   status: TicketStatus;
   createdAt: number; // Date.now()
+  calledAt?: number;
+  calledTable?: 25 | 27;
 };
 
 export type DayCounters = {

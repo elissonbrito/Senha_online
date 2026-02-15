@@ -2,11 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import type { Ticket } from "../types/queue";
 import { listenWaitingTickets } from "../services/queueRealtime";
 import { callTicket, callPriorityTicket } from "../services/tickets";
+import { listenPriorityTables } from "../services/dayRealtime";
 
 export default function Painel() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [error, setError] = useState<string>("");
 
+  const [priorityTables, setPriorityTables] = useState<{
+    "25": string | null;
+    "27": string | null;
+  }>({ "25": null, "27": null });
+
+  // fila WAITING (normal/prioridade/retirada)
   useEffect(() => {
     const unsub = listenWaitingTickets(
       (list) => setTickets(list),
@@ -15,7 +22,15 @@ export default function Painel() {
     return () => unsub();
   }, []);
 
-  // Separação por tipo (para exibir e também para chamar corretamente)
+  // mesas prioritárias (doc days/{dayKey})
+  useEffect(() => {
+    const unsubTables = listenPriorityTables(
+      (t) => setPriorityTables(t),
+      (err) => setError(String(err))
+    );
+    return () => unsubTables();
+  }, []);
+
   const grouped = useMemo(() => {
     return {
       PRIORITY: tickets.filter((t) => t.type === "PRIORITY"),
@@ -24,10 +39,10 @@ export default function Painel() {
     };
   }, [tickets]);
 
-  // Regra simples: botão "Chamar próxima" só chama NORMAL/PICKUP (não chama prioridade)
+  // "Chamar próxima" só chama NORMAL/PICKUP
   const nextNormalOrPickup = grouped.NORMAL[0] ?? grouped.PICKUP[0] ?? null;
 
-  // Prioridade só por botão especial (mesa 25/27)
+  // Prioridade: sempre pega a próxima da fila PRIORITY (WAITING)
   const nextPriority = grouped.PRIORITY[0] ?? null;
 
   async function handleCallNext() {
@@ -45,10 +60,17 @@ export default function Painel() {
     setError("");
     if (!nextPriority) return;
 
+    // trava também no front (além da transaction no backend)
+    const occupied = priorityTables[String(table) as "25" | "27"];
+    if (occupied) {
+      setError(`Mesa ${table} já está em uso para uma prioridade.`);
+      return;
+    }
+
     try {
       await callPriorityTicket(nextPriority.id, table);
     } catch (e: any) {
-      setError(e?.message ?? "Erro ao chamar prioridade");
+      setError(e?.message ?? `Erro ao chamar prioridade para mesa ${table}`);
     }
   }
 
@@ -86,10 +108,19 @@ export default function Painel() {
               </p>
 
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => handleCallPriority(25)}>
+                <button
+                  onClick={() => handleCallPriority(25)}
+                  disabled={!!priorityTables["25"]}
+                  title={priorityTables["25"] ? "Mesa 25 ocupada" : "Chamar na mesa 25"}
+                >
                   Chamar Prioridade (Mesa 25)
                 </button>
-                <button onClick={() => handleCallPriority(27)}>
+
+                <button
+                  onClick={() => handleCallPriority(27)}
+                  disabled={!!priorityTables["27"]}
+                  title={priorityTables["27"] ? "Mesa 27 ocupada" : "Chamar na mesa 27"}
+                >
                   Chamar Prioridade (Mesa 27)
                 </button>
               </div>

@@ -9,7 +9,7 @@ export default function Cardapio({ onPrimaryCTA }: { onPrimaryCTA: () => void })
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<Category>("Todos");
 
-  const categories: Category[] = ["Todos", "Entradas", "Parrilla", "Paellas", "Tapas", "Sobremesas", "Bebidas"];
+  const categories: Category[] = ["Todos", "Entradas", "Parrilla", "Guarnições", "Drinks", "Executivos", "Bebidas"];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
